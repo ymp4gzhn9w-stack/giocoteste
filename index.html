@@ -26,9 +26,8 @@
 
         canvas { 
             width: 100%; max-width: 960px; height: auto; 
-            max-height: 620px; object-fit: contain; 
+            max-height: 680px; object-fit: contain; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.8); 
-            border-bottom: 4px solid #3a506b;
         }
         
         /* UI di Gioco */
@@ -39,19 +38,19 @@
         #pause-container { position: absolute; top: 10px; right: 15px; z-index: 10; }
         .pause-btn { background: #e74c3c; border: 2px solid #c0392b; color: white; font-family: 'Arial Black', sans-serif; font-size: 13px; border-radius: 8px; padding: 6px 10px; cursor: pointer; text-transform: uppercase; font-weight: bold; }
 
-        /* Controlli Mobile posizionati perfettamente nel pannello blu sottostante */
-        .touch-controls { position: absolute; bottom: 15px; display: flex; gap: 12px; z-index: 10; }
-        #controls-left { left: 20px; }
-        #controls-right { right: 20px; gap: 10px; }
+        /* Controlli Mobile grandi e comodi posizionati nell'ampio pannello blu sottostante */
+        .touch-controls { position: absolute; bottom: 20px; display: flex; gap: 18px; z-index: 10; }
+        #controls-left { left: 25px; }
+        #controls-right { right: 25px; gap: 15px; }
         .btn { 
             background: linear-gradient(to bottom, #f3e5ab, #d4af37); 
-            border: 3px solid #5a3a11; border-radius: 16px; color: #5a3a11; font-weight: bold; 
+            border: 3px solid #5a3a11; border-radius: 18px; color: #5a3a11; font-weight: bold; 
             display: flex; justify-content: center; align-items: center; cursor: pointer; text-transform: uppercase;
-            box-shadow: 0 4px 0 #8b5a19;
+            box-shadow: 0 5px 0 #8b5a19;
         }
-        .btn:active { background: #c5a017; transform: translateY(3px); box-shadow: 0 1px 0 #8b5a19; }
-        .btn-arrow { width: 60px; height: 55px; font-size: 24px; }
-        .btn-action { padding: 0 15px; height: 55px; font-size: 16px; font-style: italic; }
+        .btn:active { background: #c5a017; transform: translateY(4px); box-shadow: 0 1px 0 #8b5a19; }
+        .btn-arrow { width: 75px; height: 70px; font-size: 30px; }
+        .btn-action { padding: 0 22px; height: 70px; font-size: 20px; font-style: italic; }
 
         /* Menu Arcade */
         #menu-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11,19,43,0.95); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 20; color: white; }
@@ -136,10 +135,10 @@
             <button id="pause-btn" class="pause-btn" onclick="togglePause()">⏸️ PAUSA</button>
         </div>
 
-        <!-- Canvas ingrandito in altezza per lasciare spazio al pannello blu inferiore -->
-        <canvas id="gameCanvas" width="960" height="620"></canvas>
+        <!-- Canvas ottimizzato con grande area blu inferiore -->
+        <canvas id="gameCanvas" width="960" height="680"></canvas>
         
-        <!-- Controlli Mobile collocati nell'area blu esterna -->
+        <!-- Controlli Mobile posizionati nell'area stadio blu -->
         <div id="controls-left" class="touch-controls hidden">
             <div class="btn btn-arrow" id="btn-left">◀</div>
             <div class="btn btn-arrow" id="btn-right">▶</div>
@@ -241,9 +240,9 @@
         let timeLeft = 180; let countdownValue = 3;
         let goalTimer = 0; let isFirstKickoff = true; 
 
-        // Il campo è posizionato nella parte superiore del canvas (groundY a 500)
+        // Campo verde posizionato più in alto (groundY a 460)
         const gravity = 0.65; 
-        const groundY = 500;
+        const groundY = 460;
 
         const keys = {}; let p2IsBot = true; 
 
@@ -330,8 +329,9 @@
                             let distToBall = ball.x - (this.x + this.headSize/2);
                             let yDist = (this.y) - ball.y;
                             
-                            if (ball.x > this.x + this.headSize && ball.x > canvas.width - 320) {
-                                moveLeft = true; 
+                            // IA BOT CORRETTA: Se la palla è alla sua destra (dietro di lui verso la sua porta), corre a destra per difendere e spazzare via!
+                            if (ball.x > this.x + this.headSize && ball.x > canvas.width - 300) {
+                                moveRight = true; 
                             } else if (activePowerUpOnField && Math.abs(activePowerUpOnField.x - this.x) < 220) {
                                 if (activePowerUpOnField.x > this.x) moveRight = true; else moveLeft = true;
                             } else {
@@ -396,14 +396,14 @@
                 if (this.y < this.radius) { this.y = this.radius; this.vy *= -this.bounce; }
 
                 if (gameState === "PLAYING") {
-                    if (this.x < 45 && this.y > 360) { score2++; triggerGoal(p2.color); } 
-                    else if (this.x > canvas.width - 45 && this.y > 360) { score1++; triggerGoal(p1.color); }
+                    if (this.x < 45 && this.y > 330) { score2++; triggerGoal(p2.color); } 
+                    else if (this.x > canvas.width - 45 && this.y > 330) { score1++; triggerGoal(p1.color); }
                     
-                    if (this.x < 70 && this.y <= 360 && this.y >= 345) { this.y = 345; this.vy *= -this.bounce; }
-                    if (this.x > canvas.width - 70 && this.y <= 360 && this.y >= 345) { this.y = 345; this.vy *= -this.bounce; }
+                    if (this.x < 70 && this.y <= 330 && this.y >= 315) { this.y = 315; this.vy *= -this.bounce; }
+                    if (this.x > canvas.width - 70 && this.y <= 330 && this.y >= 315) { this.y = 315; this.vy *= -this.bounce; }
                     
-                    if (this.x < 70 && this.y < 360) { this.x = 70; this.vx *= -this.bounce; }
-                    if (this.x > canvas.width - 70 && this.y < 360) { this.x = canvas.width - 70; this.vx *= -this.bounce; }
+                    if (this.x < 70 && this.y < 330) { this.x = 70; this.vx *= -this.bounce; }
+                    if (this.x > canvas.width - 70 && this.y < 330) { this.x = canvas.width - 70; this.vx *= -this.bounce; }
                 }
 
                 [p1, p2].forEach(p => {
@@ -454,27 +454,27 @@
 
         function drawBackground() {
             // Cielo
-            let sky = ctx.createLinearGradient(0,0,0,220); 
+            let sky = ctx.createLinearGradient(0,0,0,200); 
             sky.addColorStop(0, "#0b132b"); sky.addColorStop(1, "#3a506b"); 
-            ctx.fillStyle = sky; ctx.fillRect(0, 0, canvas.width, 220);
+            ctx.fillStyle = sky; ctx.fillRect(0, 0, canvas.width, 200);
             
             // Spalti
-            ctx.fillStyle = "#1c2541"; ctx.fillRect(0, 160, canvas.width, 60);
+            ctx.fillStyle = "#1c2541"; ctx.fillRect(0, 140, canvas.width, 60);
             ctx.fillStyle = (Math.floor(Date.now()/300) % 2 === 0) ? "#f1c40f" : "#e74c3c";
-            for(let i=0; i<35; i++) ctx.fillRect(i * 28 + 10, 175, 6, 15);
+            for(let i=0; i<35; i++) ctx.fillRect(i * 28 + 10, 155, 6, 15);
 
             // Prato principale
-            ctx.fillStyle = "#4cd137"; ctx.fillRect(0, 220, canvas.width, groundY - 220);
+            ctx.fillStyle = "#4cd137"; ctx.fillRect(0, 200, canvas.width, groundY - 200);
             ctx.fillStyle = "rgba(0,0,0,0.07)";
-            for(let i=0; i<canvas.width; i+=80) if((i/80)%2===0) ctx.fillRect(i, 220, 80, groundY - 220);
+            for(let i=0; i<canvas.width; i+=80) if((i/80)%2===0) ctx.fillRect(i, 200, 80, groundY - 200);
             
             // Linee del campo
             ctx.strokeStyle = "rgba(255, 255, 255, 0.85)"; ctx.lineWidth = 5;
-            ctx.beginPath(); ctx.moveTo(0, 230); ctx.lineTo(canvas.width, 230); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(canvas.width/2, 230); ctx.lineTo(canvas.width/2, groundY); ctx.stroke();
-            ctx.beginPath(); ctx.arc(canvas.width/2, 365, 75, 0, Math.PI*2); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(0, 210); ctx.lineTo(canvas.width, 210); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(canvas.width/2, 210); ctx.lineTo(canvas.width/2, groundY); ctx.stroke();
+            ctx.beginPath(); ctx.arc(canvas.width/2, 335, 75, 0, Math.PI*2); ctx.stroke();
 
-            // Fascia inferiore (Pezzo Blu dello Stadio - dove poggiano i tasti fuori dal campo)
+            // Fascia inferiore (Pezzo Blu dello Stadio alto e protettivo per i tasti)
             let floorGrad = ctx.createLinearGradient(0, groundY, 0, canvas.height);
             floorGrad.addColorStop(0, "#0b132b"); floorGrad.addColorStop(1, "#050814");
             ctx.fillStyle = floorGrad;
@@ -485,23 +485,23 @@
 
         function drawPorte() {
             ctx.lineWidth = 4;
-            // Porta Sinistra (da y=360 a 500)
+            // Porta Sinistra (da y=330 a 460)
             ctx.fillStyle = "rgba(255, 255, 255, 0.12)";
-            ctx.fillRect(0, 360, 70, groundY - 360);
+            ctx.fillRect(0, 330, 70, groundY - 330);
             ctx.strokeStyle = "rgba(255, 255, 255, 0.3)"; ctx.lineWidth = 2;
-            for(let gx = 10; gx < 70; gx += 15) { ctx.beginPath(); ctx.moveTo(gx, 360); ctx.lineTo(gx, groundY); ctx.stroke(); }
-            for(let gy = 375; gy < groundY; gy += 15) { ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(70, gy); ctx.stroke(); }
+            for(let gx = 10; gx < 70; gx += 15) { ctx.beginPath(); ctx.moveTo(gx, 330); ctx.lineTo(gx, groundY); ctx.stroke(); }
+            for(let gy = 345; gy < groundY; gy += 15) { ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(70, gy); ctx.stroke(); }
             ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 6;
-            ctx.beginPath(); ctx.moveTo(70, 360); ctx.lineTo(70, groundY); ctx.moveTo(0, 360); ctx.lineTo(70, 360); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(70, 330); ctx.lineTo(70, groundY); ctx.moveTo(0, 330); ctx.lineTo(70, 330); ctx.stroke();
 
-            // Porta Destra (da y=360 a 500)
+            // Porta Destra (da y=330 a 460)
             ctx.fillStyle = "rgba(255, 255, 255, 0.12)";
-            ctx.fillRect(canvas.width - 70, 360, 70, groundY - 360);
+            ctx.fillRect(canvas.width - 70, 330, 70, groundY - 330);
             ctx.strokeStyle = "rgba(255, 255, 255, 0.3)"; ctx.lineWidth = 2;
-            for(let gx = canvas.width - 60; gx < canvas.width; gx += 15) { ctx.beginPath(); ctx.moveTo(gx, 360); ctx.lineTo(gx, groundY); ctx.stroke(); }
-            for(let gy = 375; gy < groundY; gy += 15) { ctx.beginPath(); ctx.moveTo(canvas.width - 70, gy); ctx.lineTo(canvas.width, gy); ctx.stroke(); }
+            for(let gx = canvas.width - 60; gx < canvas.width; gx += 15) { ctx.beginPath(); ctx.moveTo(gx, 330); ctx.lineTo(gx, groundY); ctx.stroke(); }
+            for(let gy = 345; gy < groundY; gy += 15) { ctx.beginPath(); ctx.moveTo(canvas.width - 70, gy); ctx.lineTo(canvas.width, gy); ctx.stroke(); }
             ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 6;
-            ctx.beginPath(); ctx.moveTo(canvas.width - 70, 360); ctx.lineTo(canvas.width - 70, groundY); ctx.moveTo(canvas.width - 70, 360); ctx.lineTo(canvas.width, 360); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(canvas.width - 70, 330); ctx.lineTo(canvas.width - 70, groundY); ctx.moveTo(canvas.width - 70, 330); ctx.lineTo(canvas.width, 330); ctx.stroke();
         }
 
         setInterval(() => { if (gameState === "PLAYING" && timeLeft > 0) { timeLeft--; let min = Math.floor(timeLeft / 60); let sec = timeLeft % 60; document.getElementById('time-display').innerText = `${min}:${sec < 10 ? '0' : ''}${sec}`; if (timeLeft === 0) gameState = "GAMEOVER"; if (timeLeft % 15 === 0) spawnPowerUp(); } }, 1000);
