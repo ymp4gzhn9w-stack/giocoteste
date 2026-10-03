@@ -36,7 +36,7 @@
         #pause-container { position: absolute; top: 10px; right: 15px; z-index: 10; }
         .pause-btn { background: #e74c3c; border: 2px solid #c0392b; color: white; font-family: 'Arial Black', sans-serif; font-size: 14px; border-radius: 8px; padding: 8px 12px; cursor: pointer; text-transform: uppercase; font-weight: bold; }
 
-        /* Controlli Mobile a prova di tocco (Sensibilità massima e sollevati per non essere tagliati) */
+        /* Controlli Mobile */
         .touch-controls { position: absolute; bottom: 25px; display: flex; gap: 12px; z-index: 10; }
         #controls-left { left: 20px; }
         #controls-right { right: 20px; gap: 10px; }
@@ -100,8 +100,8 @@
                     <div class="char-img-container" id="p1-img-box"></div>
                     <div id="p1-name" style="font-weight:bold; margin-top:2px; font-size:11px;">Amica 1</div>
                     <div class="nav-arrows">
-                        <button class="nav-btn" ontstart="changeChar(1, -1); event.preventDefault();" onclick="changeChar(1, -1)">◀</button>
-                        <button class="nav-btn" ontstart="changeChar(1, 1); event.preventDefault();" onclick="changeChar(1, 1)">▶</button>
+                        <button class="nav-btn" onclick="changeChar(1, -1)">◀</button>
+                        <button class="nav-btn" onclick="changeChar(1, 1)">▶</button>
                     </div>
                 </div>
                 
@@ -112,13 +112,13 @@
                     <div class="char-img-container" id="p2-img-box"></div>
                     <div id="p2-name" style="font-weight:bold; margin-top:2px; font-size:11px;">Amica 2</div>
                     <div class="nav-arrows">
-                        <button class="nav-btn" ontstart="changeChar(2, -1); event.preventDefault();" onclick="changeChar(2, -1)">◀</button>
-                        <button class="nav-btn" ontstart="changeChar(2, 1); event.preventDefault();" onclick="changeChar(2, 1)">▶</button>
+                        <button class="nav-btn" onclick="changeChar(2, -1)">◀</button>
+                        <button class="nav-btn" onclick="changeChar(2, 1)">▶</button>
                     </div>
                 </div>
             </div>
 
-            <button id="play-btn" ontstart="startGame(); event.preventDefault();" onclick="startGame()">GIOCA ORA</button>
+            <button id="play-btn" onclick="startGame()">GIOCA ORA</button>
         </div>
 
         <div id="top-ui" class="hidden">
@@ -131,12 +131,12 @@
         </div>
 
         <div id="pause-container" class="hidden">
-            <button id="pause-btn" class="pause-btn" ontstart="togglePause(); event.preventDefault();" onclick="togglePause()">⏸️ PAUSA</button>
+            <button id="pause-btn" class="pause-btn" onclick="togglePause()">⏸️ PAUSA</button>
         </div>
 
         <canvas id="gameCanvas" width="960" height="540"></canvas>
         
-        <!-- Controlli Mobile con Touch ad altissima reattività -->
+        <!-- Controlli Mobile -->
         <div id="controls-left" class="touch-controls hidden">
             <div class="btn btn-arrow" id="btn-left">◀</div>
             <div class="btn btn-arrow" id="btn-right">▶</div>
@@ -187,27 +187,14 @@
         const gravity = 0.65; const groundY = 480;
         const keys = {}; let p2IsBot = true; 
 
-        // Configurazione Touch ad altissima reattività (Senza ritardi)
         function bindTouchButton(elementId, keyName) {
             const el = document.getElementById(elementId);
             if (!el) return;
             
-            el.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                keys[keyName] = true;
-            }, { passive: false });
+            el.addEventListener('touchstart', (e) => { e.preventDefault(); keys[keyName] = true; }, { passive: false });
+            el.addEventListener('touchend', (e) => { e.preventDefault(); keys[keyName] = false; }, { passive: false });
+            el.addEventListener('touchcancel', (e) => { e.preventDefault(); keys[keyName] = false; }, { passive: false });
 
-            el.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                keys[keyName] = false;
-            }, { passive: false });
-
-            el.addEventListener('touchcancel', (e) => {
-                e.preventDefault();
-                keys[keyName] = false;
-            }, { passive: false });
-
-            // Supporto anche per mouse (per testare comodamente da PC)
             el.addEventListener('mousedown', () => { keys[keyName] = true; });
             el.addEventListener('mouseup', () => { keys[keyName] = false; });
             el.addEventListener('mouseleave', () => { keys[keyName] = false; });
@@ -239,7 +226,7 @@
 
         const powerTypes = [
             { id: 'GIANT', icon: '🍄', color: '#ff5555' }, { id: 'SPEED', icon: '⚡', color: '#f1c40f' },
-            { id: 'ICE', icon: '❄️️', color: '#00ffff' }, { id: 'FIRE', icon: '🔥', color: '#ff9900' }
+            { id: 'ICE', icon: '❄️', color: '#00ffff' }, { id: 'FIRE', icon: '🔥', color: '#ff9900' }
         ];
         let activePowerUpOnField = null;
 
@@ -277,13 +264,18 @@
                     if (!this.isPlayer2) { moveLeft = keys['a']; moveRight = keys['d']; jump = keys['w']; kick = keys[' ']; }
                     else {
                         if (p2IsBot) {
-                            let distToBall = ball.x - (this.x + this.headSize/2), yDist = (this.y) - ball.y;
-                            if (activePowerUpOnField && Math.abs(activePowerUpOnField.x - this.x) < 200) { if (activePowerUpOnField.x > this.x) moveRight = true; else moveLeft = true; }
-                            else {
-                                if (distToBall > 30) moveRight = true; else if (distToBall < -30) moveLeft = true;
-                                if (yDist > 50 && Math.abs(distToBall) < 70 && ball.vy > 0 && Math.random() < 0.1) jump = true;
-                                if (Math.abs(distToBall) < 80 && Math.random() < 0.15) kick = true;
-                                if (ball.x > canvas.width - 250 && this.x < ball.x) moveRight = true; 
+                            let distToBall = ball.x - (this.x + this.headSize/2);
+                            let yDist = (this.y) - ball.y;
+                            
+                            // ANTIAUTOGOL: Se la palla è dietro il bot (verso la porta di destra, x > bot), il bot fa un passo indietro per spazzarla in avanti!
+                            if (ball.x > this.x + this.headSize && ball.x > canvas.width - 300) {
+                                moveLeft = true; // Torna indietro per mettersi dietro la palla
+                            } else if (activePowerUpOnField && Math.abs(activePowerUpOnField.x - this.x) < 200) {
+                                if (activePowerUpOnField.x > this.x) moveRight = true; else moveLeft = true;
+                            } else {
+                                if (distToBall > 25) moveRight = true; else if (distToBall < -25) moveLeft = true;
+                                if (yDist > 50 && Math.abs(distToBall) < 70 && ball.vy > 0 && Math.random() < 0.12) jump = true;
+                                if (Math.abs(distToBall) < 75 && Math.random() < 0.2) kick = true;
                             }
                         } else { moveLeft = keys['arrowleft']; moveRight = keys['arrowright']; jump = keys['arrowup']; kick = keys['enter']; }
                     }
@@ -328,10 +320,22 @@
                 if (Math.abs(this.vx) > 18) particles.push(new Particle(this.x, this.y, '#ff6600', 2, 4));
                 if (this.y > groundY - this.radius) { this.y = groundY - this.radius; this.vy *= -this.bounce; this.vx *= 0.95; }
                 if (this.y < this.radius) { this.y = this.radius; this.vy *= -this.bounce; }
+
+                // Rilevamento Gol Preciso e Profondo nella Rete (Porte più basse: y da 350 a 480)
                 if (gameState === "PLAYING") {
-                    if (this.x < 80 && this.y > 250) { score2++; triggerGoal(p2.color); } else if (this.x > canvas.width - 80 && this.y > 250) { score1++; triggerGoal(p1.color); }
-                    if (this.x < 80 && this.y <= 250) { this.x = 80; this.vx *= -this.bounce; } if (this.x > canvas.width - 80 && this.y <= 250) { this.x = canvas.width - 80; this.vx *= -this.bounce; }
+                    // Gol sinistro (richiede che la palla entri bene in rete x < 45)
+                    if (this.x < 45 && this.y > 350) { score2++; triggerGoal(p2.color); } 
+                    // Gol destro (richiede che la palla entri bene in rete x > canvas.width - 45)
+                    else if (this.x > canvas.width - 45 && this.y > 350) { score1++; triggerGoal(p1.color); }
+                    
+                    // Rimbalzo sulla traversa o montante anteriore
+                    if (this.x < 70 && this.y <= 350 && this.y >= 335) { this.y = 335; this.vy *= -this.bounce; }
+                    if (this.x > canvas.width - 70 && this.y <= 350 && this.y >= 335) { this.y = 335; this.vy *= -this.bounce; }
+                    
+                    if (this.x < 70 && this.y < 350) { this.x = 70; this.vx *= -this.bounce; }
+                    if (this.x > canvas.width - 70 && this.y < 350) { this.x = canvas.width - 70; this.vx *= -this.bounce; }
                 }
+
                 [p1, p2].forEach(p => {
                     let dx = this.x - (p.x + p.headSize / 2), dy = this.y - (p.y + p.headSize / 2), dist = Math.sqrt(dx*dx + dy*dy), minDist = this.radius + (p.headSize / 2);
                     if (dist < minDist && (dist > 0.1)) { let angle = Math.atan2(dy, dx), overlap = minDist - dist; this.x += Math.cos(angle) * overlap; this.y += Math.sin(angle) * overlap; this.vx = Math.cos(angle) * 5 + p.vx * 0.8; this.vy = Math.sin(angle) * 5 + p.vy * 0.8; }
@@ -365,9 +369,47 @@
             ctx.fillStyle = "rgba(0,0,0,0.08)"; for(let i=0; i<canvas.width; i+=80) if((i/80)%2===0) ctx.fillRect(i, 300, 80, groundY - 300);
             ctx.strokeStyle = "rgba(255, 255, 255, 0.8)"; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(0, 310); ctx.lineTo(canvas.width, 310); ctx.stroke(); ctx.beginPath(); ctx.moveTo(canvas.width/2, 310); ctx.lineTo(canvas.width/2, groundY); ctx.stroke(); ctx.beginPath(); ctx.arc(canvas.width/2, 400, 70, 0, Math.PI*2); ctx.stroke();
         }
+
+        // Grafica delle Porte con Rete Dettagliata e Pali in Evidenza
         function drawPorte() {
-            ctx.fillStyle = "rgba(236, 240, 241, 0.2)"; ctx.strokeStyle = "white"; ctx.lineWidth = 5;
-            ctx.fillRect(0, 250, 80, groundY - 250); ctx.strokeRect(0, 250, 80, groundY - 250); ctx.fillRect(canvas.width - 80, 250, 80, groundY - 250); ctx.strokeRect(canvas.width - 80, 250, 80, groundY - 250);
+            ctx.lineWidth = 4;
+            
+            // --- PORTA SINISTRA ---
+            // Sfondo rete con linee a griglia
+            ctx.fillStyle = "rgba(255, 255, 255, 0.12)";
+            ctx.fillRect(0, 350, 70, groundY - 350);
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
+            ctx.lineWidth = 2;
+            for(let gx = 10; gx < 70; gx += 15) {
+                ctx.beginPath(); ctx.moveTo(gx, 350); ctx.lineTo(gx, groundY); ctx.stroke();
+            }
+            for(let gy = 365; gy < groundY; gy += 15) {
+                ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(70, gy); ctx.stroke();
+            }
+            // Pali e Traversissima Bianca
+            ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.moveTo(70, 350); ctx.lineTo(70, groundY); // Palo anteriore
+            ctx.moveTo(0, 350); ctx.lineTo(70, 350);     // Traversa
+            ctx.stroke();
+
+            // --- PORTA DESTRA ---
+            ctx.fillStyle = "rgba(255, 255, 255, 0.12)";
+            ctx.fillRect(canvas.width - 70, 350, 70, groundY - 350);
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
+            ctx.lineWidth = 2;
+            for(let gx = canvas.width - 60; gx < canvas.width; gx += 15) {
+                ctx.beginPath(); ctx.moveTo(gx, 350); ctx.lineTo(gx, groundY); ctx.stroke();
+            }
+            for(let gy = 365; gy < groundY; gy += 15) {
+                ctx.beginPath(); ctx.moveTo(canvas.width - 70, gy); ctx.lineTo(canvas.width, gy); ctx.stroke();
+            }
+            // Pali e Traversissima Bianca
+            ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.moveTo(canvas.width - 70, 350); ctx.lineTo(canvas.width - 70, groundY); // Palo anteriore
+            ctx.moveTo(canvas.width - 70, 350); ctx.lineTo(canvas.width, 350);         // Traversa
+            ctx.stroke();
         }
 
         setInterval(() => { if (gameState === "PLAYING" && timeLeft > 0) { timeLeft--; let min = Math.floor(timeLeft / 60); let sec = timeLeft % 60; document.getElementById('time-display').innerText = `${min}:${sec < 10 ? '0' : ''}${sec}`; if (timeLeft === 0) gameState = "GAMEOVER"; if (timeLeft % 15 === 0) spawnPowerUp(); } }, 1000);
@@ -376,7 +418,6 @@
             player1.loadCharacter(characters[p1Index]); player2.loadCharacter(characters[p2Index]);
             document.getElementById('menu-screen').classList.add('hidden'); document.getElementById('top-ui').classList.remove('hidden'); document.getElementById('pause-container').classList.remove('hidden');
             
-            // Mostra sempre i controlli touch su dispositivi mobili
             document.getElementById('controls-left').classList.remove('hidden');
             document.getElementById('controls-right').classList.remove('hidden');
 
