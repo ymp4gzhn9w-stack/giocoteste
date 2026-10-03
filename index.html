@@ -8,52 +8,67 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Teste Calcio">
     <style>
-        body { margin: 0; padding: 0; background-color: #000; overflow: hidden; touch-action: none; font-family: 'Arial Black', sans-serif; user-select: none; -webkit-user-select: none; }
+        /* Blocco totale della selezione testo e del menu copia/incolla (Fondamentale su Mobile) */
+        body, html { margin: 0; padding: 0; background-color: #000; overflow: hidden; touch-action: none; font-family: 'Arial Black', sans-serif; 
+            -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
+            
         #game-container { position: relative; width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; background: #111; }
         canvas { max-width: 100%; max-height: 100%; box-shadow: 0 0 30px rgba(0,0,0,1); }
         
         /* UI di Gioco */
-        #top-ui { position: absolute; top: 2%; width: 100%; display: flex; justify-content: center; align-items: center; pointer-events: none; gap: 20px; z-index: 5; text-shadow: 2px 2px 0 #000; }
-        .score-box { background: rgba(0,0,0,0.7); border: 3px solid #ffcc00; padding: 5px 25px; border-radius: 12px; color: white; font-size: 36px; font-weight: bold; box-shadow: inset 0 0 15px rgba(255,255,255,0.2); }
-        #timer-box { background: rgba(0,0,0,0.8); border: 2px solid #aaa; padding: 5px 20px; border-radius: 8px; color: #00ffcc; font-size: 28px; text-align: center; }
+        #top-ui { position: absolute; top: 1%; width: 100%; display: flex; justify-content: center; align-items: center; pointer-events: none; gap: 15px; z-index: 5; text-shadow: 2px 2px 0 #000; }
+        .score-box { background: rgba(0,0,0,0.7); border: 3px solid #ffcc00; padding: 2px 15px; border-radius: 12px; color: white; font-size: 32px; font-weight: bold; }
+        #timer-box { background: rgba(0,0,0,0.8); border: 2px solid #aaa; padding: 2px 15px; border-radius: 8px; color: #00ffcc; font-size: 24px; text-align: center; }
         
-        /* Tasto Pausa */
-        #pause-container { position: absolute; top: 20px; right: 20px; z-index: 10; }
-        .pause-btn { background: #e74c3c; border: 3px solid #c0392b; color: white; font-family: 'Arial Black', sans-serif; font-size: 18px; border-radius: 10px; padding: 10px 15px; cursor: pointer; box-shadow: 0 4px 0 #c0392b; text-transform: uppercase; font-weight: bold; }
-        .pause-btn:active { transform: translateY(4px); box-shadow: 0 0 0 #c0392b; }
+        #pause-container { position: absolute; top: 10px; right: 10px; z-index: 10; }
+        .pause-btn { background: #e74c3c; border: 2px solid #c0392b; color: white; font-family: 'Arial Black', sans-serif; font-size: 14px; border-radius: 8px; padding: 8px 12px; cursor: pointer; text-transform: uppercase; font-weight: bold; }
+        .pause-btn:active { background: #c0392b; }
 
-        /* Controlli Mobile */
-        .touch-controls { position: absolute; bottom: 5%; display: flex; gap: 15px; z-index: 10; }
-        #controls-left { left: 5%; }
-        #controls-right { right: 5%; gap: 10px; }
-        .btn { background: linear-gradient(to bottom, #f3e5ab, #d4af37); border: 3px solid #5a3a11; border-radius: 15px; color: #5a3a11; font-weight: bold; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 5px 0 #8b5a19; text-transform: uppercase; }
-        .btn:active { transform: translateY(5px); box-shadow: 0 0 0 #8b5a19; background: #c5a017; }
-        .btn-arrow { width: 70px; height: 60px; font-size: 28px;}
-        .btn-action { padding: 0 20px; height: 60px; font-size: 20px; font-style: italic;}
+        /* Controlli Mobile ottimizzati */
+        .touch-controls { position: absolute; bottom: 2%; display: flex; gap: 8px; z-index: 10; opacity: 0.85; }
+        #controls-left { left: 2%; }
+        #controls-right { right: 2%; gap: 6px; }
+        .btn { background: linear-gradient(to bottom, #f3e5ab, #d4af37); border: 3px solid #5a3a11; border-radius: 12px; color: #5a3a11; font-weight: bold; display: flex; justify-content: center; align-items: center; cursor: pointer; text-transform: uppercase; }
+        .btn:active { background: #c5a017; transform: scale(0.95); }
+        .btn-arrow { width: 60px; height: 55px; font-size: 24px;}
+        .btn-action { padding: 0 15px; height: 55px; font-size: 18px; font-style: italic;}
 
-        /* Menu Arcade & Selezione Personaggi */
+        /* Menu Arcade - Modalità Smartphone */
         #menu-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 20; color: white; }
-        h1 { font-size: 50px; color: #ffcc00; text-shadow: 4px 4px 0px #d35400, 0 0 20px #ffcc00; margin-bottom: 20px; text-align: center; line-height: 1.1; }
+        h1 { font-size: 35px; color: #ffcc00; text-shadow: 2px 2px 0px #d35400; margin-bottom: 10px; text-align: center; line-height: 1.1; }
         
-        .players-preview { display: flex; gap: 40px; margin-bottom: 30px; align-items: center; }
-        .player-selector { text-align: center; background: #222; padding: 15px; border-radius: 15px; border: 4px solid; width: 160px; display: flex; flex-direction: column; align-items: center; }
-        #selector-p1 { border-color: #3498db; box-shadow: 0 0 15px #3498db; }
-        #selector-p2 { border-color: #e74c3c; box-shadow: 0 0 15px #e74c3c; }
+        .players-preview { display: flex; gap: 15px; margin-bottom: 20px; align-items: center; flex-wrap: wrap; justify-content: center; }
+        .player-selector { text-align: center; background: #222; padding: 10px; border-radius: 10px; border: 3px solid; width: 120px; display: flex; flex-direction: column; align-items: center; }
+        #selector-p1 { border-color: #3498db; }
+        #selector-p2 { border-color: #e74c3c; }
         
-        .char-img-container { width: 100px; height: 100px; border-radius: 50%; border: 3px solid white; background: #444; margin: 10px 0; overflow: hidden; display: flex; justify-content: center; align-items: center; font-size: 40px; }
+        .char-img-container { width: 70px; height: 70px; border-radius: 50%; border: 2px solid white; background: #444; margin: 5px 0; overflow: hidden; display: flex; justify-content: center; align-items: center; }
         .char-img-container img { width: 100%; height: 100%; object-fit: cover; }
         
-        .nav-arrows { display: flex; justify-content: space-between; width: 100%; margin-top: 10px; }
-        .nav-btn { background: #444; border: 2px solid white; color: white; font-weight: bold; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; font-size: 18px; line-height: 30px; }
-        .nav-btn:hover { background: #ffcc00; color: black; }
+        .nav-arrows { display: flex; justify-content: space-between; width: 100%; margin-top: 5px; }
+        .nav-btn { background: #444; border: 2px solid white; color: white; font-weight: bold; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-size: 14px; line-height: 25px; }
+        .nav-btn:active { background: #ffcc00; color: black; }
 
-        .vs-text { font-size: 40px; font-style: italic; color: #ffcc00; text-shadow: 2px 2px 0 red; }
+        .vs-text { font-size: 25px; font-style: italic; color: #ffcc00; text-shadow: 1px 1px 0 red; }
 
-        #play-btn { font-size: 30px; padding: 15px 50px; border-radius: 30px; background: #2ecc71; color: white; border: 4px solid #27ae60; cursor: pointer; text-transform: uppercase; font-weight: bold; box-shadow: 0 6px 0 #27ae60; animation: pulse 1.5s infinite; }
-        #play-btn:active { transform: translateY(6px); box-shadow: 0 0 0 #27ae60; }
+        #play-btn { font-size: 22px; padding: 10px 40px; border-radius: 20px; background: #2ecc71; color: white; border: 3px solid #27ae60; cursor: pointer; text-transform: uppercase; font-weight: bold; animation: pulse 1.5s infinite; }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
         
         .hidden { display: none !important; }
+
+        /* Media Query per Schermi grandi (Mac/PC) */
+        @media (min-width: 800px) {
+            h1 { font-size: 50px; margin-bottom: 20px; }
+            .players-preview { gap: 40px; }
+            .player-selector { width: 160px; padding: 15px; }
+            .char-img-container { width: 100px; height: 100px; }
+            .vs-text { font-size: 40px; }
+            #play-btn { font-size: 30px; padding: 15px 50px; }
+            #top-ui { top: 2%; gap: 20px; }
+            .score-box { font-size: 36px; padding: 5px 25px; }
+            #timer-box { font-size: 28px; }
+            .pause-btn { font-size: 18px; padding: 10px 15px; }
+        }
     </style>
 </head>
 <body>
@@ -61,62 +76,58 @@
     <div id="game-container">
         <!-- Menu -->
         <div id="menu-screen">
-            <h1>FOOTBALL HEADS<br><span style="font-size:20px; color:#fff;">Scegli la tua squadra</span></h1>
+            <h1>FOOTBALL HEADS<br><span style="font-size:18px; color:#fff;">Scegli la tua squadra</span></h1>
             
             <div class="players-preview">
-                <!-- Selettore P1 -->
                 <div class="player-selector" id="selector-p1">
-                    <h3>Giocatore 1</h3>
+                    <h3 style="margin:5px 0; font-size:14px;">Giocatore 1</h3>
                     <div class="char-img-container" id="p1-img-box"></div>
-                    <div id="p1-name" style="font-weight:bold; margin-top:5px;">Amica 1</div>
+                    <div id="p1-name" style="font-weight:bold; margin-top:2px; font-size:12px;">Amica 1</div>
                     <div class="nav-arrows">
-                        <button class="nav-btn" onclick="changeChar(1, -1)">◀</button>
-                        <button class="nav-btn" onclick="changeChar(1, 1)">▶</button>
+                        <button class="nav-btn" onpointerdown="changeChar(1, -1)">◀</button>
+                        <button class="nav-btn" onpointerdown="changeChar(1, 1)">▶</button>
                     </div>
                 </div>
                 
                 <div class="vs-text">VS</div>
 
-                <!-- Selettore P2 -->
                 <div class="player-selector" id="selector-p2">
-                    <h3>Giocatore 2</h3>
+                    <h3 style="margin:5px 0; font-size:14px;">Giocatore 2</h3>
                     <div class="char-img-container" id="p2-img-box"></div>
-                    <div id="p2-name" style="font-weight:bold; margin-top:5px;">Amica 2</div>
+                    <div id="p2-name" style="font-weight:bold; margin-top:2px; font-size:12px;">Amica 2</div>
                     <div class="nav-arrows">
-                        <button class="nav-btn" onclick="changeChar(2, -1)">◀</button>
-                        <button class="nav-btn" onclick="changeChar(2, 1)">▶</button>
+                        <button class="nav-btn" onpointerdown="changeChar(2, -1)">◀</button>
+                        <button class="nav-btn" onpointerdown="changeChar(2, 1)">▶</button>
                     </div>
                 </div>
             </div>
 
-            <button id="play-btn" onclick="startGame()">GIOCA ORA</button>
+            <button id="play-btn" onpointerdown="startGame()">GIOCA ORA</button>
         </div>
 
-        <!-- Interfaccia Punteggio -->
         <div id="top-ui" class="hidden">
             <div class="score-box" id="score1">0</div>
             <div id="timer-box">
-                <div style="font-size:12px; color:#aaa; margin-bottom:-5px;">TIME</div>
+                <div style="font-size:10px; color:#aaa; margin-bottom:-2px;">TIME</div>
                 <span id="time-display">3:00</span>
             </div>
             <div class="score-box" id="score2">0</div>
         </div>
 
-        <!-- Tasto Pausa -->
         <div id="pause-container" class="hidden">
-            <button id="pause-btn" class="pause-btn" onclick="togglePause()">⏸️ PAUSA</button>
+            <button id="pause-btn" class="pause-btn" onpointerdown="togglePause()">⏸️ PAUSA</button>
         </div>
 
         <canvas id="gameCanvas" width="960" height="540"></canvas>
         
-        <!-- Pulsanti Mobile -->
-        <div id="controls-left" class="touch-controls hidden">
-            <div class="btn btn-arrow" onpointerdown="keys['a']=true" onpointerup="keys['a']=false" onpointerleave="keys['a']=false">◀</div>
-            <div class="btn btn-arrow" onpointerdown="keys['d']=true" onpointerup="keys['d']=false" onpointerleave="keys['d']=false">▶</div>
+        <!-- Pulsanti Mobile: oncontextmenu blocca il menu tendina iPhone -->
+        <div id="controls-left" class="touch-controls hidden" oncontextmenu="return false;">
+            <div class="btn btn-arrow" onpointerdown="keys['a']=true" onpointerup="keys['a']=false" onpointerleave="keys['a']=false" oncontextmenu="return false;">◀</div>
+            <div class="btn btn-arrow" onpointerdown="keys['d']=true" onpointerup="keys['d']=false" onpointerleave="keys['d']=false" oncontextmenu="return false;">▶</div>
         </div>
-        <div id="controls-right" class="touch-controls hidden">
-            <div class="btn btn-action" onpointerdown="keys[' ']=true" onpointerup="keys[' ']=false" onpointerleave="keys[' ']=false">Kick</div>
-            <div class="btn btn-action" onpointerdown="keys['w']=true" onpointerup="keys['w']=false" onpointerleave="keys['w']=false">Jump</div>
+        <div id="controls-right" class="touch-controls hidden" oncontextmenu="return false;">
+            <div class="btn btn-action" onpointerdown="keys[' ']=true" onpointerup="keys[' ']=false" onpointerleave="keys[' ']=false" oncontextmenu="return false;">Kick</div>
+            <div class="btn btn-action" onpointerdown="keys['w']=true" onpointerup="keys['w']=false" onpointerleave="keys['w']=false" oncontextmenu="return false;">Jump</div>
         </div>
     </div>
 
@@ -124,7 +135,9 @@
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
 
-        // --- SISTEMA PERSONAGGI ---
+        // Disabilita zoom e scroll doppio tap
+        document.addEventListener('dblclick', function(event) { event.preventDefault(); }, { passive: false });
+
         const characters = [
             { name: "Amica 1", file: "amica1.png", color: "#3498db" },
             { name: "Amica 2", file: "amica2.png", color: "#e74c3c" },
@@ -132,78 +145,52 @@
             { name: "Amica 4", file: "amica4.png", color: "#9b59b6" } 
         ];
 
-        let p1Index = 0;
-        let p2Index = 1;
+        let p1Index = 0; let p2Index = 1;
 
         function updateMenuImages() {
             document.getElementById('p1-name').innerText = characters[p1Index].name;
             document.getElementById('p1-img-box').innerHTML = `<img src="${characters[p1Index].file}" onerror="this.style.display='none'; this.parentElement.style.backgroundColor='${characters[p1Index].color}';">`;
             document.getElementById('selector-p1').style.borderColor = characters[p1Index].color;
-            document.getElementById('selector-p1').style.boxShadow = `0 0 15px ${characters[p1Index].color}`;
 
             document.getElementById('p2-name').innerText = characters[p2Index].name;
             document.getElementById('p2-img-box').innerHTML = `<img src="${characters[p2Index].file}" onerror="this.style.display='none'; this.parentElement.style.backgroundColor='${characters[p2Index].color}';">`;
             document.getElementById('selector-p2').style.borderColor = characters[p2Index].color;
-            document.getElementById('selector-p2').style.boxShadow = `0 0 15px ${characters[p2Index].color}`;
         }
 
         function changeChar(playerNum, direction) {
-            if (playerNum === 1) {
-                p1Index = (p1Index + direction + characters.length) % characters.length;
-            } else {
-                p2Index = (p2Index + direction + characters.length) % characters.length;
-            }
+            if (playerNum === 1) p1Index = (p1Index + direction + characters.length) % characters.length;
+            else p2Index = (p2Index + direction + characters.length) % characters.length;
             updateMenuImages();
         }
         updateMenuImages();
 
-        // --- MACCHINA A STATI ---
-        let gameState = "MENU"; // MENU, COUNTDOWN, PLAYING, GOAL, PAUSED, GAMEOVER
-        let score1 = 0;
-        let score2 = 0;
-        let timeLeft = 180;
-        let countdownValue = 3;
-        let goalTimer = 0;
-        let isFirstKickoff = true; 
+        let gameState = "MENU"; 
+        let score1 = 0; let score2 = 0;
+        let timeLeft = 180; let countdownValue = 3;
+        let goalTimer = 0; let isFirstKickoff = true; 
 
-        const gravity = 0.65;
-        const groundY = 480;
-
-        const keys = {};
-        let p2IsBot = true; 
+        const gravity = 0.65; const groundY = 480;
+        const keys = {}; let p2IsBot = true; 
 
         window.addEventListener('keydown', e => { 
-            let key = e.key.toLowerCase();
-            keys[key] = true; keys[e.key] = true; 
+            let key = e.key.toLowerCase(); keys[key] = true; keys[e.key] = true; 
             if (['arrowleft', 'arrowright', 'arrowup', 'enter'].includes(key)) p2IsBot = false;
-            
-            // Attiva la pausa con il tasto P o ESC
-            if (key === 'p' || key === 'escape') {
-                togglePause();
-            }
+            if (key === 'p' || key === 'escape') togglePause();
         });
-        window.addEventListener('keyup', e => { 
-            keys[e.key.toLowerCase()] = false; keys[e.key] = false; 
-        });
+        window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; keys[e.key] = false; });
 
-        // EFFETTI VISIVI
         let particles = [];
         class Particle {
             constructor(x, y, color, speed, size) {
                 this.x = x; this.y = y; this.color = color;
-                this.vx = (Math.random() - 0.5) * speed;
-                this.vy = (Math.random() - 0.5) * speed - 2;
-                this.size = Math.random() * size + 2;
-                this.life = 1.0;
+                this.vx = (Math.random() - 0.5) * speed; this.vy = (Math.random() - 0.5) * speed - 2;
+                this.size = Math.random() * size + 2; this.life = 1.0;
             }
             update() { this.x += this.vx; this.y += this.vy; this.vy += 0.1; this.life -= 0.02; }
             draw() { ctx.globalAlpha = Math.max(0, this.life); ctx.fillStyle = this.color; ctx.fillRect(this.x, this.y, this.size, this.size); ctx.globalAlpha = 1.0; }
         }
-        function spawnParticles(x, y, color, amount) {
-            for(let i=0; i<amount; i++) particles.push(new Particle(x, y, color, 10, 6));
-        }
+        function spawnParticles(x, y, color, amount) { for(let i=0; i<amount; i++) particles.push(new Particle(x, y, color, 10, 6)); }
 
-        // POTENZIAMENTI
         const powerTypes = [
             { id: 'GIANT', icon: '🍄', color: '#ff5555' }, { id: 'SPEED', icon: '⚡', color: '#f1c40f' },
             { id: 'ICE', icon: '❄️', color: '#00ffff' }, { id: 'FIRE', icon: '🔥', color: '#ff9900' }
@@ -212,130 +199,64 @@
 
         class Player {
             constructor(startX, isPlayer2) {
-                this.startX = startX;
-                this.isPlayer2 = isPlayer2;
-                this.image = new Image();
-                this.imageLoaded = false;
-                this.color = "#ffffff";
-                
+                this.startX = startX; this.isPlayer2 = isPlayer2;
+                this.image = new Image(); this.imageLoaded = false; this.color = "#ffffff";
                 this.image.onload = () => { this.imageLoaded = true; };
                 this.image.onerror = () => { this.imageLoaded = false; };
             }
-
-            loadCharacter(charData) {
-                this.color = charData.color;
-                this.image.src = charData.file;
-                this.resetStats();
-                this.resetPosition();
-            }
-
+            loadCharacter(charData) { this.color = charData.color; this.image.src = charData.file; this.resetStats(); this.resetPosition(); }
             resetStats() {
-                this.baseHeadSize = 75;
-                this.headSize = this.baseHeadSize;
-                this.speed = 5.5;
-                this.jumpPower = -12.5;
-                this.activePower = null;
-                this.powerTimerMax = 480; 
-                this.powerTimer = 0;
-                this.isFrozen = false;
-                this.freezeTimer = 0;
-                this.hasFireKick = false;
-                this.kickCooldown = 0;
-                this.isKicking = false;
+                this.baseHeadSize = 75; this.headSize = this.baseHeadSize;
+                this.speed = 5.5; this.jumpPower = -12.5; this.activePower = null;
+                this.powerTimerMax = 480; this.powerTimer = 0;
+                this.isFrozen = false; this.freezeTimer = 0; this.hasFireKick = false;
+                this.kickCooldown = 0; this.isKicking = false;
             }
-
-            resetPosition() {
-                this.x = this.startX;
-                this.y = groundY - this.headSize;
-                this.vx = 0;
-                this.vy = 0;
-            }
-
+            resetPosition() { this.x = this.startX; this.y = groundY - this.headSize; this.vx = 0; this.vy = 0; }
             applyPower(powerId) {
-                this.activePower = powerId;
-                this.powerTimer = this.powerTimerMax;
+                this.activePower = powerId; this.powerTimer = this.powerTimerMax;
                 if (powerId === 'GIANT') this.headSize = 110;
                 if (powerId === 'SPEED') { this.speed = 9; this.jumpPower = -16; }
                 if (powerId === 'FIRE') this.hasFireKick = true;
-                if (powerId === 'ICE') {
-                    let enemy = this.isPlayer2 ? player1 : player2;
-                    enemy.isFrozen = true; enemy.freezeTimer = 120;
-                    this.activePower = null; 
-                }
+                if (powerId === 'ICE') { let enemy = this.isPlayer2 ? player1 : player2; enemy.isFrozen = true; enemy.freezeTimer = 120; this.activePower = null; }
             }
-
-            removePower() {
-                this.activePower = null; this.headSize = this.baseHeadSize;
-                this.speed = 5.5; this.jumpPower = -12.5; this.hasFireKick = false;
-            }
-
+            removePower() { this.activePower = null; this.headSize = this.baseHeadSize; this.speed = 5.5; this.jumpPower = -12.5; this.hasFireKick = false; }
             update() {
                 if (this.powerTimer > 0) { this.powerTimer--; if (this.powerTimer <= 0) this.removePower(); }
                 if (this.isFrozen) { this.freezeTimer--; this.vx = 0; if (this.freezeTimer <= 0) this.isFrozen = false; }
-                if (this.kickCooldown > 0) this.kickCooldown--;
-                this.isKicking = (this.kickCooldown > 10);
-
+                if (this.kickCooldown > 0) this.kickCooldown--; this.isKicking = (this.kickCooldown > 10);
                 let moveLeft = false, moveRight = false, jump = false, kick = false;
 
                 if (gameState === "PLAYING" && !this.isFrozen) {
-                    if (!this.isPlayer2) {
-                        moveLeft = keys['a']; moveRight = keys['d']; jump = keys['w']; kick = keys[' '];
-                    } else {
+                    if (!this.isPlayer2) { moveLeft = keys['a']; moveRight = keys['d']; jump = keys['w']; kick = keys[' ']; }
+                    else {
                         if (p2IsBot) {
-                            let distToBall = ball.x - (this.x + this.headSize/2);
-                            let yDist = (this.y) - ball.y;
-                            
-                            if (activePowerUpOnField && Math.abs(activePowerUpOnField.x - this.x) < 200) {
-                                if (activePowerUpOnField.x > this.x) moveRight = true; else moveLeft = true;
-                            } else {
+                            let distToBall = ball.x - (this.x + this.headSize/2), yDist = (this.y) - ball.y;
+                            if (activePowerUpOnField && Math.abs(activePowerUpOnField.x - this.x) < 200) { if (activePowerUpOnField.x > this.x) moveRight = true; else moveLeft = true; }
+                            else {
                                 if (distToBall > 30) moveRight = true; else if (distToBall < -30) moveLeft = true;
                                 if (yDist > 50 && Math.abs(distToBall) < 70 && ball.vy > 0 && Math.random() < 0.1) jump = true;
                                 if (Math.abs(distToBall) < 80 && Math.random() < 0.15) kick = true;
                                 if (ball.x > canvas.width - 250 && this.x < ball.x) moveRight = true; 
                             }
-                        } else {
-                            moveLeft = keys['arrowleft']; moveRight = keys['arrowright']; jump = keys['arrowup']; kick = keys['enter'];
-                        }
+                        } else { moveLeft = keys['arrowleft']; moveRight = keys['arrowright']; jump = keys['arrowup']; kick = keys['enter']; }
                     }
                 }
-
-                if (moveLeft) this.vx = -this.speed;
-                else if (moveRight) this.vx = this.speed;
-                else this.vx = 0;
-
+                if (moveLeft) this.vx = -this.speed; else if (moveRight) this.vx = this.speed; else this.vx = 0;
                 if (jump && this.y >= groundY - this.headSize) this.vy = this.jumpPower;
-
                 if (kick && this.kickCooldown === 0) {
-                    this.kickCooldown = 20;
-                    let dist = Math.hypot(ball.x - (this.x + this.headSize/2), ball.y - (this.y + this.headSize/2));
-                    if (dist < this.headSize + ball.radius + 15) {
-                        let force = this.hasFireKick ? 25 : 15;
-                        ball.vx = this.isPlayer2 ? -force : force;
-                        ball.vy = -10;
-                        if (this.hasFireKick) { spawnParticles(ball.x, ball.y, '#ff3300', 20); this.removePower(); }
-                    }
+                    this.kickCooldown = 20; let dist = Math.hypot(ball.x - (this.x + this.headSize/2), ball.y - (this.y + this.headSize/2));
+                    if (dist < this.headSize + ball.radius + 15) { let force = this.hasFireKick ? 25 : 15; ball.vx = this.isPlayer2 ? -force : force; ball.vy = -10; if (this.hasFireKick) { spawnParticles(ball.x, ball.y, '#ff3300', 20); this.removePower(); } }
                 }
-
-                this.vy += gravity;
-                this.x += this.vx; this.y += this.vy;
-
+                this.vy += gravity; this.x += this.vx; this.y += this.vy;
                 if (this.y > groundY - this.headSize) { this.y = groundY - this.headSize; this.vy = 0; }
-                if (this.x < 0) this.x = 0;
-                if (this.x > canvas.width - this.headSize) this.x = canvas.width - this.headSize;
+                if (this.x < 0) this.x = 0; if (this.x > canvas.width - this.headSize) this.x = canvas.width - this.headSize;
             }
-
             draw() {
-                if (this.activePower) {
-                    ctx.shadowBlur = 20;
-                    ctx.shadowColor = (this.activePower === 'SPEED') ? '#f1c40f' : (this.activePower === 'GIANT') ? '#ff5555' : '#ff9900';
-                }
-
+                if (this.activePower) { ctx.shadowBlur = 20; ctx.shadowColor = (this.activePower === 'SPEED') ? '#f1c40f' : (this.activePower === 'GIANT') ? '#ff5555' : '#ff9900'; }
                 if (this.imageLoaded && this.image.complete && this.image.naturalWidth !== 0) {
-                    ctx.save(); ctx.beginPath(); ctx.arc(this.x + this.headSize/2, this.y + this.headSize/2, this.headSize/2, 0, Math.PI*2);
-                    ctx.closePath(); ctx.clip();
-                    ctx.drawImage(this.image, this.x, this.y, this.headSize, this.headSize);
-                    ctx.restore();
-                    ctx.strokeStyle = this.color; ctx.lineWidth = 4; ctx.stroke();
+                    ctx.save(); ctx.beginPath(); ctx.arc(this.x + this.headSize/2, this.y + this.headSize/2, this.headSize/2, 0, Math.PI*2); ctx.closePath(); ctx.clip();
+                    ctx.drawImage(this.image, this.x, this.y, this.headSize, this.headSize); ctx.restore(); ctx.strokeStyle = this.color; ctx.lineWidth = 4; ctx.stroke();
                 } else {
                     ctx.fillStyle = this.color; ctx.beginPath(); ctx.arc(this.x + this.headSize/2, this.y + this.headSize/2, this.headSize/2, 0, Math.PI * 2); ctx.fill();
                     ctx.fillStyle = "white"; ctx.beginPath(); ctx.arc(this.x + this.headSize*0.3, this.y + this.headSize*0.4, this.headSize*0.15, 0, Math.PI*2); ctx.fill();
@@ -345,25 +266,11 @@
                     ctx.beginPath(); ctx.arc(this.x + this.headSize/2, this.y + this.headSize*0.7, this.headSize*0.1, 0, Math.PI); ctx.stroke(); 
                 }
                 ctx.shadowBlur = 0; 
-
-                if (this.isFrozen) {
-                    ctx.fillStyle = "rgba(0, 255, 255, 0.5)";
-                    ctx.fillRect(this.x - 10, this.y - 10, this.headSize + 20, this.headSize + 20);
-                }
-                if (this.powerTimer > 0) {
-                    let fill = (this.powerTimer / this.powerTimerMax) * this.headSize;
-                    ctx.fillStyle = "#222"; ctx.fillRect(this.x, this.y - 15, this.headSize, 8);
-                    ctx.fillStyle = (this.activePower === 'SPEED') ? '#f1c40f' : (this.activePower === 'GIANT') ? '#ff5555' : '#ff9900';
-                    ctx.fillRect(this.x, this.y - 15, fill, 8);
-                }
-
-                let shoeX = this.x + (this.isPlayer2 ? 10 : this.headSize - 30);
-                let shoeY = this.y + this.headSize - 5;
+                if (this.isFrozen) { ctx.fillStyle = "rgba(0, 255, 255, 0.5)"; ctx.fillRect(this.x - 10, this.y - 10, this.headSize + 20, this.headSize + 20); }
+                if (this.powerTimer > 0) { let fill = (this.powerTimer / this.powerTimerMax) * this.headSize; ctx.fillStyle = "#222"; ctx.fillRect(this.x, this.y - 15, this.headSize, 8); ctx.fillStyle = (this.activePower === 'SPEED') ? '#f1c40f' : (this.activePower === 'GIANT') ? '#ff5555' : '#ff9900'; ctx.fillRect(this.x, this.y - 15, fill, 8); }
+                let shoeX = this.x + (this.isPlayer2 ? 10 : this.headSize - 30), shoeY = this.y + this.headSize - 5;
                 if (this.isKicking) { shoeX += this.isPlayer2 ? -30 : 30; shoeY -= 15; }
-                
-                ctx.fillStyle = this.color; ctx.beginPath();
-                ctx.ellipse(shoeX, shoeY, 25, 12, (this.isKicking && !this.isPlayer2) ? -0.5 : (this.isKicking && this.isPlayer2) ? 0.5 : 0, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.fillStyle = this.color; ctx.beginPath(); ctx.ellipse(shoeX, shoeY, 25, 12, (this.isKicking && !this.isPlayer2) ? -0.5 : (this.isKicking && this.isPlayer2) ? 0.5 : 0, 0, Math.PI * 2); ctx.fill();
             }
         }
 
@@ -371,238 +278,86 @@
             constructor() { this.radius = 20; this.bounce = 0.75; this.reset(); }
             reset() { this.x = canvas.width / 2; this.y = 100; this.vx = 0; this.vy = 0; }
             update(p1, p2) {
-                this.vy += gravity; this.x += this.vx; this.y += this.vy;
-                this.vx *= 0.99; 
+                this.vy += gravity; this.x += this.vx; this.y += this.vy; this.vx *= 0.99; 
                 if (Math.abs(this.vx) > 18) particles.push(new Particle(this.x, this.y, '#ff6600', 2, 4));
-
                 if (this.y > groundY - this.radius) { this.y = groundY - this.radius; this.vy *= -this.bounce; this.vx *= 0.95; }
                 if (this.y < this.radius) { this.y = this.radius; this.vy *= -this.bounce; }
-
                 if (gameState === "PLAYING") {
-                    if (this.x < 80 && this.y > 250) { score2++; triggerGoal(p2.color); } 
-                    else if (this.x > canvas.width - 80 && this.y > 250) { score1++; triggerGoal(p1.color); }
-                    
-                    if (this.x < 80 && this.y <= 250) { this.x = 80; this.vx *= -this.bounce; }
-                    if (this.x > canvas.width - 80 && this.y <= 250) { this.x = canvas.width - 80; this.vx *= -this.bounce; }
+                    if (this.x < 80 && this.y > 250) { score2++; triggerGoal(p2.color); } else if (this.x > canvas.width - 80 && this.y > 250) { score1++; triggerGoal(p1.color); }
+                    if (this.x < 80 && this.y <= 250) { this.x = 80; this.vx *= -this.bounce; } if (this.x > canvas.width - 80 && this.y <= 250) { this.x = canvas.width - 80; this.vx *= -this.bounce; }
                 }
-
                 [p1, p2].forEach(p => {
-                    let dx = this.x - (p.x + p.headSize / 2), dy = this.y - (p.y + p.headSize / 2);
-                    let dist = Math.sqrt(dx*dx + dy*dy), minDist = this.radius + (p.headSize / 2);
-                    if (dist < minDist && (dist > 0.1)) {
-                        let angle = Math.atan2(dy, dx), overlap = minDist - dist;
-                        this.x += Math.cos(angle) * overlap; this.y += Math.sin(angle) * overlap;
-                        this.vx = Math.cos(angle) * 5 + p.vx * 0.8; this.vy = Math.sin(angle) * 5 + p.vy * 0.8;
-                    }
+                    let dx = this.x - (p.x + p.headSize / 2), dy = this.y - (p.y + p.headSize / 2), dist = Math.sqrt(dx*dx + dy*dy), minDist = this.radius + (p.headSize / 2);
+                    if (dist < minDist && (dist > 0.1)) { let angle = Math.atan2(dy, dx), overlap = minDist - dist; this.x += Math.cos(angle) * overlap; this.y += Math.sin(angle) * overlap; this.vx = Math.cos(angle) * 5 + p.vx * 0.8; this.vy = Math.sin(angle) * 5 + p.vy * 0.8; }
                 });
             }
-            draw() {
-                ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2); ctx.fill();
-                ctx.strokeStyle = "#000"; ctx.lineWidth = 3; ctx.stroke();
-                ctx.fillStyle = "#000"; ctx.beginPath(); ctx.arc(this.x, this.y, this.radius * 0.4, 0, Math.PI * 2); ctx.fill();
-            }
+            draw() { ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2); ctx.fill(); ctx.strokeStyle = "#000"; ctx.lineWidth = 3; ctx.stroke(); ctx.fillStyle = "#000"; ctx.beginPath(); ctx.arc(this.x, this.y, this.radius * 0.4, 0, Math.PI * 2); ctx.fill(); }
         }
 
         function handlePlayerCollision(p1, p2) {
-            let dx = (p1.x + p1.headSize/2) - (p2.x + p2.headSize/2);
-            let dy = (p1.y + p1.headSize/2) - (p2.y + p2.headSize/2);
-            let dist = Math.sqrt(dx*dx + dy*dy);
-            let minDist = (p1.headSize/2) + (p2.headSize/2);
-
-            if (dist < minDist && dist > 0.1) {
-                let overlap = (minDist - dist) / 2;
-                let angle = Math.atan2(dy, dx);
-                p1.x += Math.cos(angle) * overlap;
-                p2.x -= Math.cos(angle) * overlap;
-            }
+            let dx = (p1.x + p1.headSize/2) - (p2.x + p2.headSize/2), dy = (p1.y + p1.headSize/2) - (p2.y + p2.headSize/2), dist = Math.sqrt(dx*dx + dy*dy), minDist = (p1.headSize/2) + (p2.headSize/2);
+            if (dist < minDist && dist > 0.1) { let overlap = (minDist - dist) / 2, angle = Math.atan2(dy, dx); p1.x += Math.cos(angle) * overlap; p2.x -= Math.cos(angle) * overlap; }
         }
 
-        const player1 = new Player(150, false);
-        const player2 = new Player(730, true);
-        const ball = new Ball();
+        const player1 = new Player(150, false); const player2 = new Player(730, true); const ball = new Ball();
 
         function spawnPowerUp() {
             if (activePowerUpOnField || gameState !== "PLAYING") return;
-            let type = powerTypes[Math.floor(Math.random() * powerTypes.length)];
-            activePowerUpOnField = { type: type, x: 200 + Math.random() * (canvas.width - 400), y: -50, vy: 0 };
+            activePowerUpOnField = { type: powerTypes[Math.floor(Math.random() * powerTypes.length)], x: 200 + Math.random() * (canvas.width - 400), y: -50, vy: 0 };
         }
-
         function triggerGoal(color) {
-            gameState = "GOAL";
-            goalTimer = 120; // 2 secondi a rallentatore
-            document.getElementById('score1').innerText = score1;
-            document.getElementById('score2').innerText = score2;
-            spawnParticles(ball.x, ball.y, color, 100);
-            ball.vx *= 0.1; ball.vy *= 0.1; // Effetto Slow Motion
+            gameState = "GOAL"; goalTimer = 120; document.getElementById('score1').innerText = score1; document.getElementById('score2').innerText = score2; spawnParticles(ball.x, ball.y, color, 100); ball.vx *= 0.1; ball.vy *= 0.1; 
         }
-
         function resetKickoff() {
-            player1.resetStats(); player1.resetPosition();
-            player2.resetStats(); player2.resetPosition();
-            ball.reset();
-            activePowerUpOnField = null;
-            
-            if (isFirstKickoff) {
-                gameState = "COUNTDOWN";
-                countdownValue = 3;
-                let cdInterval = setInterval(() => {
-                    countdownValue--;
-                    if (countdownValue === 0) countdownValue = "VIA!";
-                    else if (countdownValue < 0 || isNaN(countdownValue)) {
-                        clearInterval(cdInterval);
-                        gameState = "PLAYING";
-                        isFirstKickoff = false;
-                    }
-                }, 1000);
-            } else {
-                gameState = "PLAYING";
-            }
+            player1.resetStats(); player1.resetPosition(); player2.resetStats(); player2.resetPosition(); ball.reset(); activePowerUpOnField = null;
+            if (isFirstKickoff) { gameState = "COUNTDOWN"; countdownValue = 3; let cdInterval = setInterval(() => { countdownValue--; if (countdownValue === 0) countdownValue = "VIA!"; else if (countdownValue < 0 || isNaN(countdownValue)) { clearInterval(cdInterval); gameState = "PLAYING"; isFirstKickoff = false; } }, 1000); } else { gameState = "PLAYING"; }
         }
 
         function drawBackground() {
-            let sky = ctx.createLinearGradient(0,0,0,300);
-            sky.addColorStop(0, "#192a56"); sky.addColorStop(1, "#3498db");
-            ctx.fillStyle = sky; ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = "#2f3640"; ctx.fillRect(0, 180, canvas.width, 100);
-            ctx.fillStyle = "#4cd137"; ctx.fillRect(0, 300, canvas.width, groundY - 300);
-            ctx.fillStyle = "rgba(0,0,0,0.08)";
-            for(let i=0; i<canvas.width; i+=80) if((i/80)%2===0) ctx.fillRect(i, 300, 80, groundY - 300);
-            ctx.strokeStyle = "rgba(255, 255, 255, 0.8)"; ctx.lineWidth = 5;
-            ctx.beginPath(); ctx.moveTo(0, 310); ctx.lineTo(canvas.width, 310); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(canvas.width/2, 310); ctx.lineTo(canvas.width/2, groundY); ctx.stroke();
-            ctx.beginPath(); ctx.arc(canvas.width/2, 400, 70, 0, Math.PI*2); ctx.stroke();
+            let sky = ctx.createLinearGradient(0,0,0,300); sky.addColorStop(0, "#192a56"); sky.addColorStop(1, "#3498db"); ctx.fillStyle = sky; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#2f3640"; ctx.fillRect(0, 180, canvas.width, 100); ctx.fillStyle = "#4cd137"; ctx.fillRect(0, 300, canvas.width, groundY - 300);
+            ctx.fillStyle = "rgba(0,0,0,0.08)"; for(let i=0; i<canvas.width; i+=80) if((i/80)%2===0) ctx.fillRect(i, 300, 80, groundY - 300);
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.8)"; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(0, 310); ctx.lineTo(canvas.width, 310); ctx.stroke(); ctx.beginPath(); ctx.moveTo(canvas.width/2, 310); ctx.lineTo(canvas.width/2, groundY); ctx.stroke(); ctx.beginPath(); ctx.arc(canvas.width/2, 400, 70, 0, Math.PI*2); ctx.stroke();
         }
-
         function drawPorte() {
             ctx.fillStyle = "rgba(236, 240, 241, 0.2)"; ctx.strokeStyle = "white"; ctx.lineWidth = 5;
-            ctx.fillRect(0, 250, 80, groundY - 250); ctx.strokeRect(0, 250, 80, groundY - 250);
-            ctx.fillRect(canvas.width - 80, 250, 80, groundY - 250); ctx.strokeRect(canvas.width - 80, 250, 80, groundY - 250);
+            ctx.fillRect(0, 250, 80, groundY - 250); ctx.strokeRect(0, 250, 80, groundY - 250); ctx.fillRect(canvas.width - 80, 250, 80, groundY - 250); ctx.strokeRect(canvas.width - 80, 250, 80, groundY - 250);
         }
 
-        // Timer di Partita
-        setInterval(() => {
-            if (gameState === "PLAYING" && timeLeft > 0) {
-                timeLeft--;
-                let min = Math.floor(timeLeft / 60);
-                let sec = timeLeft % 60;
-                document.getElementById('time-display').innerText = `${min}:${sec < 10 ? '0' : ''}${sec}`;
-                if (timeLeft === 0) gameState = "GAMEOVER";
-                if (timeLeft % 15 === 0) spawnPowerUp();
-            }
-        }, 1000);
+        setInterval(() => { if (gameState === "PLAYING" && timeLeft > 0) { timeLeft--; let min = Math.floor(timeLeft / 60); let sec = timeLeft % 60; document.getElementById('time-display').innerText = `${min}:${sec < 10 ? '0' : ''}${sec}`; if (timeLeft === 0) gameState = "GAMEOVER"; if (timeLeft % 15 === 0) spawnPowerUp(); } }, 1000);
 
         function startGame() {
-            player1.loadCharacter(characters[p1Index]);
-            player2.loadCharacter(characters[p2Index]);
-
-            document.getElementById('menu-screen').classList.add('hidden');
-            document.getElementById('top-ui').classList.remove('hidden');
-            document.getElementById('pause-container').classList.remove('hidden'); // Mostra tasto pausa
-            
-            if(window.innerWidth < 1000) {
-                document.getElementById('controls-left').classList.remove('hidden');
-                document.getElementById('controls-right').classList.remove('hidden');
-            }
-            score1 = 0; score2 = 0; timeLeft = 180; isFirstKickoff = true;
-            document.getElementById('score1').innerText = "0";
-            document.getElementById('score2').innerText = "0";
-            document.getElementById('time-display').innerText = "3:00";
-            
-            resetKickoff();
+            player1.loadCharacter(characters[p1Index]); player2.loadCharacter(characters[p2Index]);
+            document.getElementById('menu-screen').classList.add('hidden'); document.getElementById('top-ui').classList.remove('hidden'); document.getElementById('pause-container').classList.remove('hidden');
+            if(window.innerWidth < 1000 || 'ontouchstart' in window) { document.getElementById('controls-left').classList.remove('hidden'); document.getElementById('controls-right').classList.remove('hidden'); }
+            score1 = 0; score2 = 0; timeLeft = 180; isFirstKickoff = true; document.getElementById('score1').innerText = "0"; document.getElementById('score2').innerText = "0"; document.getElementById('time-display').innerText = "3:00"; resetKickoff();
         }
 
-        // Funzione Pausa
         function togglePause() {
-            if (gameState === "PLAYING") {
-                gameState = "PAUSED";
-                document.getElementById('pause-btn').innerText = "▶️ PLAY";
-                document.getElementById('pause-btn').style.background = "#2ecc71";
-                document.getElementById('pause-btn').style.borderColor = "#27ae60";
-                document.getElementById('pause-btn').style.boxShadow = "0 4px 0 #27ae60";
-            } else if (gameState === "PAUSED") {
-                gameState = "PLAYING";
-                document.getElementById('pause-btn').innerText = "⏸️ PAUSA";
-                document.getElementById('pause-btn').style.background = "#e74c3c";
-                document.getElementById('pause-btn').style.borderColor = "#c0392b";
-                document.getElementById('pause-btn').style.boxShadow = "0 4px 0 #c0392b";
-            }
+            if (gameState === "PLAYING") { gameState = "PAUSED"; document.getElementById('pause-btn').innerText = "▶"; document.getElementById('pause-btn').style.background = "#2ecc71"; document.getElementById('pause-btn').style.borderColor = "#27ae60"; }
+            else if (gameState === "PAUSED") { gameState = "PLAYING"; document.getElementById('pause-btn').innerText = "⏸"; document.getElementById('pause-btn').style.background = "#e74c3c"; document.getElementById('pause-btn').style.borderColor = "#c0392b"; }
         }
 
         function gameLoop() {
-            // Disegna tutto a prescindere dallo stato
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawBackground();
-            drawPorte();
-
-            // Aggiorna la fisica e i movimenti SOLO se NON siamo in pausa o gameover
+            ctx.clearRect(0, 0, canvas.width, canvas.height); drawBackground(); drawPorte();
             if (gameState === "PLAYING" || gameState === "GOAL") {
-                player1.update(); player2.update();
-                handlePlayerCollision(player1, player2);
-                ball.update(player1, player2);
-
+                player1.update(); player2.update(); handlePlayerCollision(player1, player2); ball.update(player1, player2);
                 if (activePowerUpOnField) {
-                    activePowerUpOnField.vy += gravity * 0.5; activePowerUpOnField.y += activePowerUpOnField.vy;
-                    if (activePowerUpOnField.y > groundY - 30) { activePowerUpOnField.y = groundY - 30; activePowerUpOnField.vy *= -0.5; }
-                    
-                    [player1, player2].forEach(p => {
-                        if (Math.hypot(p.x+p.headSize/2 - activePowerUpOnField.x, p.y+p.headSize/2 - activePowerUpOnField.y) < p.headSize) {
-                            p.applyPower(activePowerUpOnField.type.id);
-                            activePowerUpOnField = null;
-                            spawnParticles(p.x + p.headSize/2, p.y, p.color, 20);
-                        }
-                    });
+                    activePowerUpOnField.vy += gravity * 0.5; activePowerUpOnField.y += activePowerUpOnField.vy; if (activePowerUpOnField.y > groundY - 30) { activePowerUpOnField.y = groundY - 30; activePowerUpOnField.vy *= -0.5; }
+                    [player1, player2].forEach(p => { if (Math.hypot(p.x+p.headSize/2 - activePowerUpOnField.x, p.y+p.headSize/2 - activePowerUpOnField.y) < p.headSize) { p.applyPower(activePowerUpOnField.type.id); activePowerUpOnField = null; spawnParticles(p.x + p.headSize/2, p.y, p.color, 20); } });
                 }
-                
-                // Aggiorna le particelle solo se il gioco scorre
                 particles.forEach((p, i) => { p.update(); if(p.life <= 0) particles.splice(i, 1); });
             }
+            if (activePowerUpOnField) { ctx.fillStyle = "rgba(0,0,0,0.5)"; ctx.beginPath(); ctx.arc(activePowerUpOnField.x+15, activePowerUpOnField.y+15, 20, 0, Math.PI*2); ctx.fill(); ctx.font = "30px Arial"; ctx.fillText(activePowerUpOnField.type.icon, activePowerUpOnField.x, activePowerUpOnField.y + 25); }
+            particles.forEach((p) => { p.draw(); }); player1.draw(); player2.draw(); ball.draw();
 
-            // Disegna PowerUp (se esiste e siamo in gioco o pausa)
-            if (activePowerUpOnField) {
-                ctx.fillStyle = "rgba(0,0,0,0.5)"; ctx.beginPath(); ctx.arc(activePowerUpOnField.x+15, activePowerUpOnField.y+15, 20, 0, Math.PI*2); ctx.fill();
-                ctx.font = "30px Arial"; ctx.fillText(activePowerUpOnField.type.icon, activePowerUpOnField.x, activePowerUpOnField.y + 25);
-            }
-
-            // Disegna particelle
-            particles.forEach((p) => { p.draw(); });
-
-            player1.draw(); player2.draw(); ball.draw();
-
-            // Overlay Stati Speciali
-            if (gameState === "COUNTDOWN") {
-                ctx.fillStyle = "rgba(0,0,0,0.5)"; ctx.fillRect(0,0,canvas.width,canvas.height);
-                ctx.fillStyle = "#ffcc00"; ctx.font = "100px Arial Black"; ctx.textAlign = "center";
-                ctx.lineWidth = 8; ctx.strokeStyle = "black";
-                ctx.strokeText(countdownValue, canvas.width/2, canvas.height/2 + 30);
-                ctx.fillText(countdownValue, canvas.width/2, canvas.height/2 + 30);
-            } 
-            else if (gameState === "GOAL") {
-                goalTimer--;
-                ctx.fillStyle = "rgba(0,0,0,0.4)"; ctx.fillRect(0,0,canvas.width,canvas.height);
-                ctx.fillStyle = "#fff"; ctx.font = "120px Arial Black"; ctx.textAlign = "center";
-                ctx.strokeText("GOOOAL!!!", canvas.width/2, canvas.height/2 + 40);
-                ctx.fillText("GOOOAL!!!", canvas.width/2, canvas.height/2 + 40);
-                if (goalTimer <= 0) resetKickoff(); 
-            } 
-            else if (gameState === "PAUSED") {
-                // Schermata di Pausa
-                ctx.fillStyle = "rgba(0,0,0,0.6)"; ctx.fillRect(0,0,canvas.width,canvas.height);
-                ctx.fillStyle = "#ffcc00"; ctx.font = "80px Arial Black"; ctx.textAlign = "center";
-                ctx.lineWidth = 6; ctx.strokeStyle = "black";
-                ctx.strokeText("PAUSA", canvas.width/2, canvas.height/2 + 10);
-                ctx.fillText("PAUSA", canvas.width/2, canvas.height/2 + 10);
-            }
-            else if (gameState === "GAMEOVER") {
-                ctx.fillStyle = "rgba(0,0,0,0.8)"; ctx.fillRect(0,0,canvas.width,canvas.height);
-                ctx.fillStyle = "#ffcc00"; ctx.font = "60px Arial Black"; ctx.textAlign = "center";
-                ctx.fillText("TEMPO SCADUTO!", canvas.width/2, canvas.height/2 - 40);
-                let w = score1 > score2 ? "VINCE G1!" : score2 > score1 ? "VINCE G2!" : "PAREGGIO!";
-                ctx.fillStyle = "#fff"; ctx.fillText(w, canvas.width/2, canvas.height/2 + 40);
-            }
+            if (gameState === "COUNTDOWN") { ctx.fillStyle = "rgba(0,0,0,0.5)"; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.fillStyle = "#ffcc00"; ctx.font = "100px Arial Black"; ctx.textAlign = "center"; ctx.lineWidth = 8; ctx.strokeStyle = "black"; ctx.strokeText(countdownValue, canvas.width/2, canvas.height/2 + 30); ctx.fillText(countdownValue, canvas.width/2, canvas.height/2 + 30); } 
+            else if (gameState === "GOAL") { goalTimer--; ctx.fillStyle = "rgba(0,0,0,0.4)"; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.fillStyle = "#fff"; ctx.font = "120px Arial Black"; ctx.textAlign = "center"; ctx.strokeText("GOOOAL!!!", canvas.width/2, canvas.height/2 + 40); ctx.fillText("GOOOAL!!!", canvas.width/2, canvas.height/2 + 40); if (goalTimer <= 0) resetKickoff(); } 
+            else if (gameState === "PAUSED") { ctx.fillStyle = "rgba(0,0,0,0.6)"; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.fillStyle = "#ffcc00"; ctx.font = "80px Arial Black"; ctx.textAlign = "center"; ctx.lineWidth = 6; ctx.strokeStyle = "black"; ctx.strokeText("PAUSA", canvas.width/2, canvas.height/2 + 10); ctx.fillText("PAUSA", canvas.width/2, canvas.height/2 + 10); }
+            else if (gameState === "GAMEOVER") { ctx.fillStyle = "rgba(0,0,0,0.8)"; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.fillStyle = "#ffcc00"; ctx.font = "60px Arial Black"; ctx.textAlign = "center"; ctx.fillText("TEMPO SCADUTO!", canvas.width/2, canvas.height/2 - 40); let w = score1 > score2 ? "VINCE G1!" : score2 > score1 ? "VINCE G2!" : "PAREGGIO!"; ctx.fillStyle = "#fff"; ctx.fillText(w, canvas.width/2, canvas.height/2 + 40); }
 
             requestAnimationFrame(gameLoop);
         }
-
         gameLoop();
     </script>
 </body>
